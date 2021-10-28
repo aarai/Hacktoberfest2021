@@ -2,71 +2,74 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-class Todo extends React.Component {
+class Todos extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            items: [],
-            text: ''
-        }
-        this.handleChange = this.handleChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
+        this.state = { todos: [], text: '' };
+        this.removeTodo = this.removeTodo.bind(this);
+    }
+
+    addTodo(e) {
+        e.preventDefault();
+        this.setState({ 
+        	todos: [ this.state.text, ...this.state.todos ],
+        	text: ''
+        });
+    }
+
+    removeTodo(name, i){
+        let todos = this.state.todos.slice();
+        todos.splice(i, 1);
+        this.setState({
+            todos
+        });
+    }
+
+    updateValue(e) {
+        this.setState({ text: e.target.value})
     }
 
     render() {
-        return (
+        return(
             <div>
-                <h3>TODO</h3>
-                <TodoList items={this.state.items}/>
-                <form onSubmit={this.handleSubmit}>
+                <h1>Todo List</h1>  
+                <TodoList todos={this.state.todos} removeTodo={this.removeTodo}/>
+                <form onSubmit = {(e) => this.addTodo(e)}>
                     <input
-                        onChange={this.handleChange}
+                        placeholder="Add Todo"
                         value={this.state.text}
+                        onChange={(e) => {this.updateValue(e)}}
                     />
-                    <button>
-                        Add #{this.state.items.length + 1}
-                    </button>
+                    <button className="btn" type="submit">Add Todo</button>
                 </form>
             </div>
         );
     }
-
-    handleChange(e) {
-        this.setState({ text: e.target.value });
-    }
-
-    handleSubmit(e) {
-        e.preventDefault();
-        if(!this.state.text.length) {
-            return;
-        }
-        const newItem = {
-            id: Date.now(),
-            text: this.state.text,
-        }
-        this.setState(prev => ({
-            items: prev.items.concat(newItem),
-            text: ''
-        }));
-    }
 }
 
 class TodoList extends React.Component {
+
+    removeItem(item, i) {
+        this.props.removeTodo(item, i);
+    }
+
     render() {
-        return (
+        return(
             <ul>
-                {this.props.items.map(item => (
-                    <li key={item.id}>{item.text}</li>
-                ))}
+                { this.props.todos.map((todo,i) => {
+                    return <li key={i}>{ todo } <button className="btn2" onClick={() => { this.removeItem(todo, i)}}>Delete</button></li>
+                })}
             </ul>
-        )
+        );
     }
 }
+
+//ReactDOM.render(<Todos/>, document.getElementById('app'))
 
 
 // ========================================
 
 ReactDOM.render(
-    <Todo />,
+    <Todos />,
     document.getElementById('root')
 );
